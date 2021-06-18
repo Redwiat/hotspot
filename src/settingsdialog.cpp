@@ -32,12 +32,15 @@
 #include <KUrlRequester>
 #include <kconfiggroup.h>
 #include <ksharedconfig.h>
+#include <QKeyEvent>
 #include <QLineEdit>
 #include <QListView>
 
+namespace {
 KConfigGroup config()
 {
     return KSharedConfig::openConfig()->group("PerfPaths");
+}
 }
 
 SettingsDialog::SettingsDialog(QWidget* parent)
@@ -183,6 +186,16 @@ void SettingsDialog::addPathSettingsPage()
 
     connect(unwindPage->debugPaths, &KEditListWidget::changed, this, &SettingsDialog::saveCurrentConfig);
     connect(unwindPage->extraLibraryPaths, &KEditListWidget::changed, this, &SettingsDialog::saveCurrentConfig);
+}
+
+void SettingsDialog::keyPressEvent(QKeyEvent* event)
+{
+    // disable the return -> accept policy since it prevents the user from confirming name changes in the combobox
+    // you can still press CTRL + Enter to close the dialog
+    if (event->modifiers() != Qt::Key_Control && (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)) {
+        return;
+    }
+    QDialog::keyPressEvent(event);
 }
 
 void SettingsDialog::saveCurrentConfig()
